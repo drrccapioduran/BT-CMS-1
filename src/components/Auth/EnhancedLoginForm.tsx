@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, Shield, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Shield, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-const EnhancedLoginForm: React.FC = () => {
+interface EnhancedLoginFormProps {
+  onBackToPublic?: () => void;
+}
+
+const EnhancedLoginForm: React.FC<EnhancedLoginFormProps> = ({ onBackToPublic }) => {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showRegister, setShowRegister] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,9 +29,67 @@ const EnhancedLoginForm: React.FC = () => {
     setIsLoading(false);
   };
 
+  const handleRegister = async (name: string, email: string, password: string) => {
+    setIsLoading(true);
+    setError('');
+
+    // For demo purposes, we'll just show success
+    setTimeout(() => {
+      setError('Registration feature is not implemented in this demo. Please use the demo credentials.');
+      setIsLoading(false);
+      setShowRegister(false);
+    }, 1000);
+  };
+
+  if (showRegister) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
+        <div className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl">
+          <div className="text-center">
+            <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-4">
+              <Shield className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Create Account</h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              Join AdminCMS and start building
+            </p>
+          </div>
+
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              Registration is not available in this demo. Please use the demo credentials to login.
+            </p>
+          </div>
+
+          <div className="text-center">
+            <button
+              onClick={() => setShowRegister(false)}
+              className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-medium flex items-center space-x-2 mx-auto"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Login</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl">
+        {/* Back to Public Button */}
+        {onBackToPublic && (
+          <div className="flex justify-start">
+            <button
+              onClick={onBackToPublic}
+              className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm">Back to Public Site</span>
+            </button>
+          </div>
+        )}
+
         <div className="text-center">
           <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-4">
             <Shield className="h-8 w-8 text-white" />
@@ -129,7 +192,7 @@ const EnhancedLoginForm: React.FC = () => {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
-              {isLoading ? (
+                onClick={() => setShowRegister(true)}
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 'Sign In'

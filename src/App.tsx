@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
-import EnhancedLoginForm from './components/Auth/EnhancedLoginForm';
 import PublicApp from './components/Public/PublicApp';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
@@ -20,18 +19,29 @@ const AppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [darkMode, setDarkMode] = useState(false);
 
-  // Show public frontend by default for non-authenticated users
-  if (isPublicView && !user) {
+  // Show public frontend by default
+  if (isPublicView) {
     return (
       <div className="relative">
         <PublicApp />
-        {/* Admin Access Button */}
-        <button
-          onClick={() => setIsPublicView(false)}
-          className="fixed bottom-6 right-6 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition-colors z-50"
-        >
-          Admin Login
-        </button>
+        {/* Admin Access Button - only show if not authenticated */}
+        {!user && (
+          <button
+            onClick={() => setIsPublicView(false)}
+            className="fixed bottom-6 right-6 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition-colors z-50"
+          >
+            Admin Login
+          </button>
+        )}
+        {/* Back to Public Button - show if authenticated */}
+        {user && (
+          <button
+            onClick={() => setIsPublicView(false)}
+            className="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-green-700 transition-colors z-50"
+          >
+            Admin Dashboard
+          </button>
+        )}
       </div>
     );
   }
@@ -57,8 +67,16 @@ const AppContent: React.FC = () => {
     }
   };
 
+  // If not authenticated, show login with back to public option
+  if (!user) {
+    return (
+      <EnhancedLoginForm onBackToPublic={() => setIsPublicView(true)} />
+    );
+  }
+
+  // Show admin dashboard for authenticated users
   return (
-    <ProtectedRoute requiredRole="user">
+    <div className="relative">
       <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
         <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
           <div className="flex h-screen">
@@ -68,7 +86,10 @@ const AppContent: React.FC = () => {
                 darkMode={darkMode}
                 onDarkModeToggle={() => setDarkMode(!darkMode)}
                 user={user || { name: 'User', email: 'user@example.com' }}
-                onLogout={logout}
+                onLogout={() => {
+                  logout();
+                  setIsPublicView(true);
+                }}
               />
               <main className="flex-1 overflow-x-hidden overflow-y-auto">
                 {renderContent()}
@@ -77,7 +98,14 @@ const AppContent: React.FC = () => {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
+      {/* Back to Public Button */}
+      <button
+        onClick={() => setIsPublicView(true)}
+        className="fixed bottom-6 left-6 bg-gray-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-700 transition-colors z-50"
+      >
+        View Public Site
+      </button>
+    </div>
   );
 };
 
